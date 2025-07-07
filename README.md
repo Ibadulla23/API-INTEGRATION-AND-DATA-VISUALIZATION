@@ -19,3 +19,5 @@ API Integration
 API (Application Programming Interface) integration involves connecting a web application with external services or data providers. APIs allow different software systems to communicate and exchange information in real time. Through RESTful APIs or GraphQL, developers can fetch data such as weather updates, financial statistics, user information, or third-party functionalities like payment gateways and maps.
 
 In a typical frontend development scenario, API integration is implemented using HTTP requests via tools like fetch, Axios, or built-in browser APIs. The response, usually in JSON format, is then processed and displayed to the user. This approach reduces redundancy and allows developers to leverage powerful backend systems without building them from scratch".
+
+"OUTPUT"     :<img width="703" height="140" alt="Image" src="https://github.com/user-attachments/assets/e0251003-f8fb-499f-88b3-8960e53dce0a" />
