@@ -1,0 +1,91 @@
+
+import requests
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import datetime
+import matplotlib.dates as mdates
+
+def fetch_weather_data(api_key, city="London"):
+    """Fetch weather forecast data from OpenWeatherMap API"""
+    base_url = "http://api.openweathermap.org/data/2.5/forecast"
+    try:
+        params = {
+            'q': city,
+            'appid': api_key,
+            'units': 'metric'
+        }
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()  # Raise exception for HTTP errors
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching weather data: {e}")
+        return None
+
+def visualize_weather(data, city="London"):
+    """Visualize temperature and humidity forecast data"""
+    if not data or 'list' not in data:
+        print("No valid weather data to visualize")
+        return
+    
+    try:
+        # Extract relevant data
+        forecasts = data['list']
+        dates = [forecast['dt_txt'] for forecast in forecasts]
+        temps = [forecast['main']['temp'] for forecast in forecasts]
+        humidity = [forecast['main']['humidity'] for forecast in forecasts]
+        
+        # Convert dates to datetime objects
+        dates = [datetime.strptime(date, '%Y-%m-%d %H:%M:%S') for date in dates]
+        
+        # Create figure with subplots
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10))
+        fig.suptitle(f'5-Day Weather Forecast for {city}', fontsize=16)
+        
+        # Plot temperature
+        ax1.plot(dates, temps, 'r-', marker='o', linewidth=2, markersize=8)
+        ax1.set_title('Temperature Forecast', pad=20)
+        ax1.set_ylabel('Temperature (°C)', fontsize=12)
+        ax1.grid(True, linestyle='--', alpha=0.7)
+        
+        # Annotate temperature points
+        for i, temp in enumerate(temps):
+            ax1.annotate(f'{temp}°C', (dates[i], temps[i]), 
+                        textcoords="offset points", xytext=(0,10), ha='center')
+        
+        # Plot humidity
+        ax2.plot(dates, humidity, 'b-', marker='o', linewidth=2, markersize=8)
+        ax2.set_title('Humidity Forecast', pad=20)
+        ax2.set_ylabel('Humidity (%)', fontsize=12)
+        ax2.grid(True, linestyle='--', alpha=0.7)
+        
+        # Annotate humidity points
+        for i, hum in enumerate(humidity):
+            ax2.annotate(f'{hum}%', (dates[i], humidity[i]), 
+                        textcoords="offset points", xytext=(0,10), ha='center')
+        
+        # Format x-axis for both subplots
+        for ax in [ax1, ax2]:
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%a %d %b'))
+            ax.xaxis.set_major_locator(mdates.DayLocator())
+            plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+        
+        plt.tight_layout()
+        plt.savefig('weather_dashboard.png', dpi=300, bbox_inches='tight')
+        plt.show()
+        
+    except KeyError as e:
+        print(f"Error processing weather data: Missing key {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+if __name__ == "__main__":
+    # Get API key from user input (don't hardcode sensitive info)
+    api_key = input("Enter your OpenWeatherMap API key: ").strip()
+    city = input("Enter city name (default: London): ").strip() or "London"
+    
+    weather_data = fetch_weather_data(api_key, city)
+    
+    if weather_data:
+        visualize_weather(weather_data, city)
+    else:
+        print("Failed to generate weather visualization")
